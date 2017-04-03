@@ -21,7 +21,7 @@ public class WelcomeRequestAdapter extends WelcomeRequestBuilder {
     public WelcomeRequestAdapter with(WelcomeRequestModel model) {
         withClientId(model.getClientId());
         DateTime requestDateTime = DateTime.now();
-        if (StringUtils.isEmpty(model.getRequestDateTime())) {
+        if (!StringUtils.isEmpty(model.getRequestDateTime())) {
             // todo: throws exception if not formatted properly - catch and handle nicely
             requestDateTime = DateTime.parse(model.getRequestDateTime());
         } else {

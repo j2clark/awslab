@@ -34,7 +34,7 @@ public class QueuePoller {
 
     public QueuePoller(@Value("${poller.maxThreads:10}") int maxThreads,
                        @Value("${poller.maxEvents:100}") int maxEvents,
-                       @Value("${poller.maxThreads:150000}") long maxProcessTime,
+                       @Value("${poller.maxProcessTime:150000}") long maxProcessTime,
                        @Value("${resource.queuename:tmail-resource}") final String queueName,
                        final AmazonSQS sqs,
                        final EventHandlerRegistry eventHandlerRegistry) {

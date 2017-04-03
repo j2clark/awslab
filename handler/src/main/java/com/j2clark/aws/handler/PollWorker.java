@@ -122,7 +122,8 @@ public class PollWorker implements Runnable {
 
 
                     // pass to handler
-                    Optional<EventHandler> eventHandler = eventHandlerRegistry.findEventHandler(event);
+                    Optional<EventHandler> eventHandler = eventHandlerRegistry.findEventHandler(
+                        event);
                     if (eventHandler.isPresent()) {
                         eventHandler.get().onEvent(messageId, event);
                     } else {

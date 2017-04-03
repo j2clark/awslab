@@ -22,6 +22,9 @@
 
     <modules>
         <module>tmail</module>
+        <module>handler</module>
+        <module>domain</module>
+        <module>sqs-config</module>
     </modules>
 
     <dependencyManagement>

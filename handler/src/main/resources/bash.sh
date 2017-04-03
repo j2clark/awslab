@@ -13,7 +13,7 @@ cd /app
 mkdir logs
 
 # copy latest jar from s3
-aws s3 cp s3://j2clark/repo/tmail/latest/latest.jar /app/app.jar
+aws s3 cp s3://j2clark/repo/handler/latest/latest.jar /app/app.jar
 
-# run application - we should still be /app
+# run application - we should still be in /app
 java -jar app.jar &
