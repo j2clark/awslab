@@ -1,10 +1,11 @@
 package com.j2clark.aws.handler;
 
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.model.GetQueueUrlRequest;
+import com.j2clark.aws.sqs.SQS;
+import com.j2clark.aws.sqs.SQSFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -19,36 +20,30 @@ public class QueuePoller {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    //private final EventHandler eventHandler;
     private final EventHandlerRegistry eventHandlerRegistry;
-    private final AmazonSQS sqs;
-    private final String queueName;
-    private final String queueUrl;
+    private final SQS sqs;
     private final int maxEvents;
     private final long maxProcessTime;
-
-    //private final ObjectMapper objectMapper = new ObjectMapper();
-
     private final ExecutorService pollExecutor;
     private final Semaphore workerManager;
 
+    @Autowired
     public QueuePoller(@Value("${poller.maxThreads:10}") int maxThreads,
-                       @Value("${poller.maxEvents:100}") int maxEvents,
+                       @Value("${poller.maxEvents:10}") int maxEvents, // max value for SQS is 10
                        @Value("${poller.maxProcessTime:150000}") long maxProcessTime,
                        @Value("${resource.queuename:tmail-resource}") final String queueName,
-                       final AmazonSQS sqs,
+                       final SQSFactory sqsFactory,
                        final EventHandlerRegistry eventHandlerRegistry) {
+        if (maxEvents > 10 || maxEvents < 1) {
+            throw new IllegalArgumentException("SQS maxEvents must be a value between 1 and 10, inclusive");
+        }
         this.maxEvents = maxEvents;
         this.maxProcessTime = maxProcessTime;
         this.pollExecutor = Executors.newFixedThreadPool(maxThreads);
         this.workerManager = new Semaphore(maxThreads);
 
-        // fail fast - if we do not find the queue, we should throw up
-        logger.info("look up SQS QueueURL for queueName["+queueName+"]...");
-        this.queueUrl = getQueueUrl(sqs, queueName);
-        logger.info("SQS["+queueUrl+"] found for queueName["+queueName+"]");
-        this.queueName = queueName;
-        this.sqs = sqs;
+        // fail fast - sqsFactory will throw exception if queue not found, and forceCreate is false
+        this.sqs = sqsFactory.of(queueName);
         this.eventHandlerRegistry = eventHandlerRegistry;
 
         // todo: find queueUrl to verify queue exisists and we have access
@@ -63,7 +58,7 @@ public class QueuePoller {
             try {
                 if (workerManager.tryAcquire(100, TimeUnit.MILLISECONDS)) {
                     pollExecutor.execute(
-                        PollWorker.of(workerManager, sqs, queueName, queueUrl, maxEvents, maxProcessTime, eventHandlerRegistry)
+                        PollWorker.of(workerManager, sqs, maxEvents, maxProcessTime, eventHandlerRegistry)
                     );
                 }
             } catch (InterruptedException e) {
@@ -74,10 +69,4 @@ public class QueuePoller {
         //    logger.warn("RESOURCE QUEUE PROCESSING IS DISABLED ON THIS SERVER");
        ///}
     }
-
-    protected String getQueueUrl(final AmazonSQS sqs, String queueName){
-        GetQueueUrlRequest getQueueUrlRequest = new GetQueueUrlRequest(queueName);
-        return sqs.getQueueUrl(getQueueUrlRequest).getQueueUrl();
-    }
-
 }

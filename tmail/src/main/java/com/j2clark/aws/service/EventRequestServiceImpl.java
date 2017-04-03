@@ -1,10 +1,8 @@
 package com.j2clark.aws.service;
 
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.model.GetQueueUrlRequest;
-import com.amazonaws.services.sqs.model.SendMessageRequest;
-import com.amazonaws.services.sqs.model.SendMessageResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.j2clark.aws.sqs.SQS;
+import com.j2clark.aws.sqs.SQSFactory;
 import com.j2clark.aws.domain.EventMessage;
 import com.j2clark.aws.domain.EventMessageBuilder;
 import com.j2clark.aws.domain.Request;
@@ -22,23 +20,16 @@ public class EventRequestServiceImpl implements EventRequestService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final AmazonSQS sqs;
-    private final String queueName;
-    private final String queueUrl;
+    private final SQS sqs;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     public EventRequestServiceImpl(
         @Value("${resource.queuename:tmail-resource}") final String queueName,
-        final AmazonSQS sqs) {
+        final SQSFactory sqsFactory) {
 
-        this.queueName = queueName;
-
-        // fail fast - if we do not find the queue, we should throw up
-        logger.info("look up SQS QueueURL for queueName["+queueName+"]...");
-        this.queueUrl = getQueueUrl(sqs, queueName);
-        logger.info("SQS["+queueUrl+"] found for queueName["+queueName+"]");
-        this.sqs = sqs;
+        // fail fast - sqsFactgory will throw an exception if queue is not found, and force create not enabled
+        this.sqs = sqsFactory.of(queueName);
     }
 
     /**
@@ -50,22 +41,14 @@ public class EventRequestServiceImpl implements EventRequestService {
 
         try {
             EventMessage message = EventMessageBuilder.of(request).build();
-
             String json = objectMapper.writeValueAsString(message);
+            String messageId = sqs.send(json);
 
-            SendMessageResult result = sqs.sendMessage(new SendMessageRequest(queueUrl, json));
-
-            logger.info("Request["+request.getTransactionId()+"] SQS["+queueName+"] pushed. MessageId[" + result.getMessageId() + "]");
+            logger.info("Request["+request.getTransactionId()+"] SQS["+sqs.name()+"] pushed. MessageId[" + messageId + "]");
         } catch (IOException e) {
             // fatal exception - this request is dead
             // todo: create a nicr exception which we can handle more gracefully
             throw new RuntimeException(e);
         }
     }
-
-    protected String getQueueUrl(final AmazonSQS sqs, String queueName){
-        GetQueueUrlRequest getQueueUrlRequest = new GetQueueUrlRequest(queueName);
-        return sqs.getQueueUrl(getQueueUrlRequest).getQueueUrl();
-    }
-
 }

@@ -27,9 +27,7 @@ public class MockAmazonSQS extends AbstractAmazonSQS {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    //private Stack<Message> stack = new Stack<>();
     private Map<String,String> queue = new LinkedHashMap<>();
-    // todo: will adapt this to an in-memroy impl of AmazonSQS
 
     @Override
     public ListQueuesResult listQueues() {
