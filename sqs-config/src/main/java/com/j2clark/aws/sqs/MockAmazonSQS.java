@@ -1,4 +1,4 @@
-package com.j2clark.aws;
+package com.j2clark.aws.sqs;
 
 import com.amazonaws.services.sqs.AbstractAmazonSQS;
 import com.amazonaws.services.sqs.model.DeleteMessageRequest;

@@ -24,12 +24,8 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-sqs</artifactId>
-        </dependency>
 
-        <dependency>
+        <!--<dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
         </dependency>
@@ -41,10 +37,12 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-        </dependency>
+        </dependency>-->
     </dependencies>
 
     <build>
+
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -58,7 +56,58 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--
+                assumes following in .m2/settings
+                <servers>
+                    <server>
+                      <id>aws-release</id>
+                      <username></username>
+                      <password></password>
+                    </server>
+                </servers>
+                -->
+            <!--<plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>wagon-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <id>deploy-release</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>upload</goal>
+                        </goals>
+                        <configuration>
+                            <serverId>aws-release</serverId>
+                            <fromDir>${project.basedir}/target</fromDir>
+                            <toDir>latest</toDir>
+                            &lt;!&ndash;<fromDir>${project.build.directory}</fromDir>
+                            <toDir>${project.version}</toDir>&ndash;&gt;
+                            <excludes>
+                                *
+                            </excludes>
+                            <includes>
+                                ${project.artifactId}-${project.version}.jar
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>-->
+            <!--<plugin>
+                https://github.com/bazaarvoice/s3-upload-maven-plugin
+                <groupId>com.bazaarvoice.maven.plugins</groupId>
+                <artifactId>s3-upload-maven-plugin</artifactId>
+                <version>1.4</version>
+                <configuration>
+                    <accessKey></accessKey>
+                    <secretKey></secretKey>
+                    <bucketName></bucketName>
+                    <source>target/tmail-${build.version}.jar</source>
+                    <destination>latest.jar</destination>
+                </configuration>
+            </plugin>-->
         </plugins>
     </build>
+
 
 </project>

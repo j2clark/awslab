@@ -17,10 +17,14 @@ public class WelcomeEventHandler extends AbstractEventHandler implements EventHa
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final NotifyService messagingService;
 
     @Autowired
-    public WelcomeEventHandler(EventHandlerRegistry registry) {
+    public WelcomeEventHandler(EventHandlerRegistry registry,
+                               NotifyService messagingService) {
         super(registry, EventMessage.Type.welcome);
+
+        this.messagingService = messagingService;
     }
 
     @Override
@@ -32,7 +36,15 @@ public class WelcomeEventHandler extends AbstractEventHandler implements EventHa
 
             logger.info("handle WELCOME request["+welcomeRequest.getTransactionId()+"]");
 
+            try {
+                messagingService.send(NotifyService.NotificationBuilder.instance()
 
+                                          .build());
+            } catch (Throwable t) {
+                // failed to send message
+                // either mark for retry and republish,
+                // or log to failed and log warning
+            }
             /*// format to pinpoint standards
             PinpointRequest pinpointRequest = PinpointRequest.of()
                 .build();
