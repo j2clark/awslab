@@ -1,7 +1,18 @@
 # aws-lab
 
-TODO:
-Metrics
+## References
+
+AWS Java API http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/index.html
+
+## TODO:
+
+### Features
+* enable Email messages
+* enable SMS notifications
+* break out email/sns to separate application (aka pinpoint)
+* enable application callback using SNS
+
+### Metrics
 * Send metrics to CloudWatch, 
   see http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/customize-containers-cw.html
   
@@ -9,11 +20,13 @@ Metrics
   The Custom Metrics are priced on a per-metric basis. You’ll pay $0.50 per metric per month regardless of the number of values that you store for the metric. We are also reducing the price of EC2 Detailed Monitoring to $3.50 per month (7 metrics * $0.50 / metric). You can store 10 metrics per month at no charge; these can be used for both Custom Metrics and EC2 Detailed Monitoring metrics.
 
   http://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_PutMetricData.html
-
 * create dashboard for mwetrics
 
-SDLC
+### SDLC
 * publish fresh builds to respective S3 bucket, with appropriate name, e.g.
+    https://github.com/bazaarvoice/s3-upload-maven-plugin
+    https://github.com/spring-projects/aws-maven
+
     repo/
     |-- appName/
            |-app-1.0.jar
@@ -21,14 +34,17 @@ SDLC
            |-- latest/
                   |-app.jar (->app-2.0.jar)
 
-AMI - create java 8 AMI
-AutoScale Group using custom AMI
+### AMI 
+* create custom java 8 AMI
+
+### AutoScale Group 
+* Implement AutoScale using custom AMI (above)
 
 
 
 
 
-Remote debugging into EC2 using intellij
+## Remote debugging into EC2 using intellij
 
 Under EC2 - Security Groups
 1. Create Security Group:

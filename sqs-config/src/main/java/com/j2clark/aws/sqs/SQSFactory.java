@@ -4,7 +4,6 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
 import com.amazonaws.services.sqs.model.CreateQueueResult;
 import com.amazonaws.services.sqs.model.DeleteMessageRequest;
-import com.amazonaws.services.sqs.model.DeleteMessageResult;
 import com.amazonaws.services.sqs.model.GetQueueUrlResult;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.QueueDoesNotExistException;
@@ -15,15 +14,14 @@ import com.amazonaws.util.CollectionUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
-@Component
+//@Component
 public class SQSFactory {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -31,27 +29,36 @@ public class SQSFactory {
     private final boolean forceCreate;
     private final AmazonSQS amazonSQS;
 
-    @Autowired
-    public SQSFactory(@Value("${sqsfactory.forceCreate:false}") final boolean forceCreate,
+    // create one sqs per queuename and store in map
+    // primarily done to enable in-memory sqs for dev env
+    private Map<String,SQSQueue> queueMap = new HashMap<>();
+
+
+    public SQSFactory(final boolean forceCreate,
                       final AmazonSQS amazonSQS) {
         this.forceCreate = forceCreate;
         this.amazonSQS = amazonSQS;
     }
 
-    public SQS of(String queueName) {
+    public SQSQueue of(String queueName) {
 
         Optional<String> queueUrl = findQueueUrl(queueName);
         if (!queueUrl.isPresent()) {
             if (forceCreate) {
-                logger.warn("force-create SQS queue for queueName["+queueName+"]");
-                CreateQueueResult result = amazonSQS.createQueue(new CreateQueueRequest(queueName));
+                logger.warn("force-create SQSQueue queue for queueName[" + queueName + "]");
+                CreateQueueResult
+                    result =
+                    amazonSQS.createQueue(new CreateQueueRequest(queueName));
                 queueUrl = Optional.of(result.getQueueUrl());
             } else {
-                throw new IllegalStateException("SQS QueueName["+queueName+"] does not exist");
+                throw new IllegalStateException(
+                    "SQSQueue QueueName[" + queueName + "] does not exist");
             }
         }
 
-        logger.warn("queueUrl["+queueUrl+"] found for SQS queue with queueName["+queueName+"]");
+        logger.warn(
+            "queueUrl[" + queueUrl + "] found for SQSQueue queue with queueName[" + queueName
+            + "]");
 
         return new SQSImpl(amazonSQS, queueUrl.get(), queueName);
     }
@@ -65,7 +72,7 @@ public class SQSFactory {
         }
     }
 
-    private static class SQSImpl implements SQS {
+    private static class SQSImpl implements SQSQueue {
 
         private final AmazonSQS sqs;
         private final String queueName;
@@ -97,17 +104,13 @@ public class SQSFactory {
             }
         }
 
-        public String deleteMessage(Message message) {
-            String messageId = message.getMessageId();
+        public Message deleteMessage(Message message) {
             deleteMessage(message.getReceiptHandle());
-            return messageId;
+            return message;
         }
 
         public void deleteMessage(String messageHandle) {
-
-            DeleteMessageResult
-                deleteResult =
-                sqs.deleteMessage(new DeleteMessageRequest().withQueueUrl(queueUrl)
+            sqs.deleteMessage(new DeleteMessageRequest().withQueueUrl(queueUrl)
                                       .withReceiptHandle(messageHandle));
         }
     }

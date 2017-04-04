@@ -2,8 +2,8 @@ package com.j2clark.aws.handler;
 
 import com.amazonaws.services.sqs.model.Message;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.j2clark.aws.sqs.SQS;
-import com.j2clark.aws.domain.EventMessage;
+import com.j2clark.aws.domain.Request;
+import com.j2clark.aws.sqs.SQSQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,30 +22,30 @@ public class PollWorker implements Runnable {
 
 
     private final Semaphore workerManager;
-    private final SQS sqs;
+    private final SQSQueue sqs;
     private final int maxEvents;
     private final long maxProcessTime;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final EventHandlerRegistry eventHandlerRegistry;
+    private final RequestHandlerRegistry requestHandlerRegistry;
 
     public static PollWorker of(final Semaphore workerManager,
-                                final SQS sqs,
+                                final SQSQueue sqs,
                                 final int maxEvents,
                                 final long maxProcessTime,
-                                final EventHandlerRegistry eventHandlerRegistry) {
-        return new PollWorker(workerManager, sqs, maxEvents, maxProcessTime, eventHandlerRegistry);
+                                final RequestHandlerRegistry requestHandlerRegistry) {
+        return new PollWorker(workerManager, sqs, maxEvents, maxProcessTime, requestHandlerRegistry);
     }
 
     public PollWorker(final Semaphore workerManager,
-                      final SQS sqs,
+                      final SQSQueue sqs,
                       final int maxEvents,
                       final long maxProcessTime,
-                      final EventHandlerRegistry eventHandlerRegistry) {
+                      final RequestHandlerRegistry requestHandlerRegistry) {
         this.workerManager = workerManager;
         this.sqs = sqs;
         this.maxEvents = maxEvents;
         this.maxProcessTime = maxProcessTime;
-        this.eventHandlerRegistry = eventHandlerRegistry;
+        this.requestHandlerRegistry = requestHandlerRegistry;
     }
 
     @Override
@@ -65,7 +65,7 @@ public class PollWorker implements Runnable {
 
         if(logger.isDebugEnabled()) {
             logger
-                .debug("PollID[" + pollId + "] SQS[" + sqs.name() + "] begin poll for " + maxEvents);
+                .debug("PollID[" + pollId + "] SQSQueue[" + sqs.name() + "] begin poll for " + maxEvents);
         }
 
         Collection<Message> messages = sqs.retrieveMessages(maxEvents);
@@ -73,7 +73,7 @@ public class PollWorker implements Runnable {
 
 
             int size = messages.size();
-            logger.info("PollID[" + pollId + "] SQS[" + sqs.name() + "] found " + size + " messages");
+            logger.info("PollID[" + pollId + "] SQSQueue[" + sqs.name() + "] found " + size + " messages");
 
             Iterator<Message> it = messages.iterator();
             while (it.hasNext() && procEndTime > System.currentTimeMillis()) {
@@ -84,42 +84,41 @@ public class PollWorker implements Runnable {
                 String json = message.getBody();
                 String messageId = message.getMessageId();
 
-                logger.info("PollID[" + pollId + "] SQS[" + sqs.name() + "] begin processing MessageId["+messageId+"]: msgCount[" + msgCount + "] of [" + size + "]");
+                logger.info("PollID[" + pollId + "] SQSQueue[" + sqs.name() + "] begin processing MessageId["+messageId+"]: msgCount[" + msgCount + "] of [" + size + "]");
 
                 try {
                     long processEventStart = System.currentTimeMillis();
 
                     // we are commited to this message - delete from queue
                     sqs.deleteMessage(message);
-                    logger.info("PollID[" + pollId + "] SQS[" + sqs.name() + "] MessageId["+messageId+"] deleted from queue");
+                    logger.info("PollID[" + pollId + "] SQSQueue[" + sqs.name() + "] MessageId["+messageId+"] deleted from queue");
 
                     // attempt to deserialize
-                    //Request r = objectMapper.readValue(json, Request.class);
-                    EventMessage event = objectMapper.readValue(json, EventMessage.class);
+                    Request r = objectMapper.readValue(json, Request.class);
+                    //EventMessage event = objectMapper.readValue(json, EventMessage.class);
 
-                    logger.info("PollID[" + pollId + "] SQS[" + sqs.name() + "] MessageId["+messageId+"] RequestId[XYZ] successfully deserialized to ...");
+                    logger.info("PollID[" + pollId + "] SQSQueue[" + sqs.name() + "] MessageId["+messageId+"] RequestId["+r.getTransactionId()+"] successfully deserialized");
 
 
                     // pass to handler
-                    Optional<EventHandler> eventHandler = eventHandlerRegistry.findEventHandler(
-                        event);
+                    Optional<RequestHandler> eventHandler = requestHandlerRegistry.findEventHandler(r);
                     if (eventHandler.isPresent()) {
-                        eventHandler.get().onEvent(messageId, event);
+                        eventHandler.get().onEvent(messageId, r);
                     } else {
                         // todo: more detailed reason why it failed
-                        failed.info("SQS["+sqs.name()+"] MessageID["+messageId+"] PollID["+pollId+"] - No Handler Found: " + json);
+                        failed.info("SQSQueue["+sqs.name()+"] MessageID["+messageId+"] PollID["+pollId+"] - No Handler Found: " + json);
                     }
 
-                    logger.info("PollID[" + pollId + "] SQS[" + sqs.name() + "] MessageId["+messageId+"] process completed in " + (System.currentTimeMillis() - processEventStart) + "ms");
+                    logger.info("PollID[" + pollId + "] SQSQueue[" + sqs.name() + "] MessageId["+messageId+"] process completed in " + (System.currentTimeMillis() - processEventStart) + "ms");
                 } catch (IOException e) {
                     // formatting issue - this message is dead
                     // todo: log to failed
-                    failed.info("SQS["+sqs.name()+"] MessageID["+messageId+"] PollID["+pollId+"]: " + json);
+                    failed.info("SQSQueue["+sqs.name()+"] MessageID["+messageId+"] PollID["+pollId+"]: " + json);
                 }
             }
 
             long endTime = System.currentTimeMillis();
-            logger.info("PollID["+pollId+"] SQS["+sqs.name()+"] poll complete. Processed "+msgCount+" records in " + (endTime - startTime) + " ms");
+            logger.info("PollID["+pollId+"] SQSQueue["+sqs.name()+"] poll complete. Processed "+msgCount+" records in " + (endTime - startTime) + " ms");
         }
     }
 

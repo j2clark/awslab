@@ -1,8 +1,8 @@
 package com.j2clark.aws.sqs;
 
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
+import com.amazonaws.services.sqs.buffered.AmazonSQSBufferedAsyncClient;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +16,17 @@ import org.springframework.util.CollectionUtils;
 import java.util.Arrays;
 import java.util.Collection;
 
+/**
+ * API Reference
+ * http://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/Welcome.html
+ *
+ * Developer Guide
+ * http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/Welcome.html
+ *
+ * http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/index.html?com/amazonaws/services/sqs/AmazonSQS.html
+ *
+ * http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-attributes.html
+ */
 @Configuration
 public class SQSConfig {
 
@@ -25,28 +36,20 @@ public class SQSConfig {
     private Environment environment;
 
     @Bean
-    public AmazonSQS amazonSQSClient(@Value("${aws.sqs.region:us-west-1}") String awsRegion) {
-
-        AmazonSQS amazonSQS;
-
-        Regions region = Regions.DEFAULT_REGION;
-        if(isDev()) {
-            logger.warn("Dev Environment!!! Using MockAmazonSQS implementation!");
-            amazonSQS = new MockAmazonSQS();
+    public SQSFactory amazonSQSFactory (@Value("${aws.sqs.region:us-west-1}") String awsRegion,
+                                        @Value("${sqsfactory.forceCreate:false}") final boolean forceCreate) {
+        if (isDev()) {
+            return new MockSQSFactory();
         } else {
-            // although Regions is an enum, Regions.valueOf() throws IllegalArgumentException. Use fromName() instead
-            region = Regions.fromName(awsRegion);
-            amazonSQS = AmazonSQSClientBuilder.standard().withRegion(region).build();
-        }
+            AmazonSQS amazonSQS = new AmazonSQSBufferedAsyncClient(
+                AmazonSQSAsyncClientBuilder.standard()
+                    .withRegion(awsRegion)
+                    .build()
+            );
 
-        logger.info("SQS ]" + region.getName() + "] queueUrls:");
-        for (String queueUrl : amazonSQS.listQueues().getQueueUrls()) {
-            logger.info("SQS[" + queueUrl + "]");
+            return new SQSFactory(forceCreate, amazonSQS);
         }
-
-        return amazonSQS;
     }
-
 
     protected boolean isDev() {
         Collection<String> activeProfiles = Arrays.asList(environment.getActiveProfiles());

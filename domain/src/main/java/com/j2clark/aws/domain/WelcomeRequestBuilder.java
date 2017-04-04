@@ -4,18 +4,27 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class WelcomeRequestBuilder {
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     private UUID transactionId;
     private String clientId;
     private Long requestDateTime;
     private String uid;
     private String firstName;
     private String lastName;
-    private String email;
+    private Set<RequestChannel> channels = new LinkedHashSet<>();
 
     public WelcomeRequestBuilder withTransactionId(UUID transactionId) {
         this.transactionId = transactionId;
@@ -47,8 +56,27 @@ public class WelcomeRequestBuilder {
         return this;
     }
 
-    public WelcomeRequestBuilder withEmail(String email) {
-        this.email = email;
+    /*public WelcomeRequestBuilder withEmail(String email) {
+        if (!StringUtils.isEmpty(email)) {
+
+        }
+        return this;
+    }
+
+    public WelcomeRequestBuilder withSms(String sms) {
+        if (!StringUtils.isEmpty(sms)) {
+
+        }
+        return this;
+    }*/
+
+    public WelcomeRequestBuilder withChannel(RequestChannel channel) {
+        if (channel != null) {
+            if (this.channels.contains(channel)) {
+                logger.warn("Builder already contains channel["+channel+"]. Check your code.");
+            }
+            this.channels.add(channel);
+        }
         return this;
     }
 
@@ -63,49 +91,55 @@ public class WelcomeRequestBuilder {
         if (StringUtils.isEmpty(uid)) {
             throw new IllegalStateException("Missing required attribute[uid]");
         }
-        if (StringUtils.isEmpty(email)) {
-            throw new IllegalStateException("Missing required attribute[email]");
-        }
+        /*if (CollectionUtils.isEmpty(channels)) {
+            throw new IllegalStateException("No requestChannels have been added");
+        }*/
     }
 
-    public WelcomeRequest build() {
+    public Request.Welcome build() {
 
         validate();
 
-        return new WelcomeRequestImpl(transactionId,
-                                  clientId,
-                                  uid,
-                                  requestDateTime,
-                                  firstName,
-                                  lastName,
-                                  email);
+        return new WelcomeImpl(transactionId,
+                                      clientId,
+                                      uid,
+                                      requestDateTime,
+                                      firstName,
+                                      lastName,
+                                      channels);
     }
 
-    public static class WelcomeRequestImpl implements WelcomeRequest {
+    public static class WelcomeImpl implements Request.Welcome {
         private final UUID transactionId;
         private final String clientId;
-        private final long requestDateTime;
+        private final long requestTimestamp;
         private final String uid;
         private final String firstName;
         private final String lastName;
-        private final String email;
+        private final Set<RequestChannel> channels;
+
 
         @JsonCreator
-        public WelcomeRequestImpl(
+        public WelcomeImpl(
             @JsonProperty("transactionId") UUID transactionId,
             @JsonProperty("clientId") String clientId,
             @JsonProperty("uid") String uid,
-            @JsonProperty("requestDateTime") long requestDateTime,
+            @JsonProperty("requestTimestanmp") long requestTimestamp,
             @JsonProperty("firstName") String firstName,
             @JsonProperty("lastName") String lastName,
-            @JsonProperty("email") String email) {
+            @JsonProperty("channels") Set<RequestChannel> channels) {
             this.transactionId = transactionId;
             this.clientId = clientId;
             this.uid = uid;
-            this.requestDateTime = requestDateTime;
+            this.requestTimestamp = requestTimestamp;
             this.firstName = firstName;
             this.lastName = lastName;
-            this.email = email;
+            if (CollectionUtils.isEmpty(channels)) {
+                this.channels = Collections.emptySet();
+            } else {
+                this.channels = new LinkedHashSet<>(channels);
+            }
+
         }
 
         /*@Override
@@ -123,71 +157,28 @@ public class WelcomeRequestBuilder {
         }
 
         @Override
-        public long getRequestDateTime() {
-            return requestDateTime;
+        public long getRequestTimestamp() {
+            return requestTimestamp;
         }
 
+        @Override
         public String getUid() {
             return uid;
         }
 
+        @Override
         public String getFirstName() {
             return firstName;
         }
 
+        @Override
         public String getLastName() {
             return lastName;
         }
 
         @Override
-        public String getEmail() {
-            return email;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof WelcomeRequestImpl)) {
-                return false;
-            }
-
-            WelcomeRequestImpl that = (WelcomeRequestImpl) o;
-
-            if (requestDateTime != that.requestDateTime) {
-                return false;
-            }
-            if (transactionId != null ? !transactionId.equals(that.transactionId)
-                                      : that.transactionId != null) {
-                return false;
-            }
-            if (clientId != null ? !clientId.equals(that.clientId) : that.clientId != null) {
-                return false;
-            }
-            if (uid != null ? !uid.equals(that.uid) : that.uid != null) {
-                return false;
-            }
-            if (firstName != null ? !firstName.equals(that.firstName) : that.firstName != null) {
-                return false;
-            }
-            if (lastName != null ? !lastName.equals(that.lastName) : that.lastName != null) {
-                return false;
-            }
-            return !(email != null ? !email.equals(that.email) : that.email != null);
-
-        }
-
-        @Override
-        public int hashCode() {
-            int result = transactionId != null ? transactionId.hashCode() : 0;
-            result = 31 * result + (clientId != null ? clientId.hashCode() : 0);
-            result = 31 * result + (int) (requestDateTime ^ (requestDateTime >>> 32));
-            result = 31 * result + (uid != null ? uid.hashCode() : 0);
-            result = 31 * result + (firstName != null ? firstName.hashCode() : 0);
-            result = 31 * result + (lastName != null ? lastName.hashCode() : 0);
-            result = 31 * result + (email != null ? email.hashCode() : 0);
-            return result;
+        public Set<RequestChannel> getChannels() {
+            return channels;
         }
     }
 }

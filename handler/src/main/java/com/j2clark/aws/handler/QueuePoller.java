@@ -1,6 +1,6 @@
 package com.j2clark.aws.handler;
 
-import com.j2clark.aws.sqs.SQS;
+import com.j2clark.aws.sqs.SQSQueue;
 import com.j2clark.aws.sqs.SQSFactory;
 
 import org.slf4j.Logger;
@@ -20,8 +20,8 @@ public class QueuePoller {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final EventHandlerRegistry eventHandlerRegistry;
-    private final SQS sqs;
+    private final RequestHandlerRegistry requestHandlerRegistry;
+    private final SQSQueue sqs;
     private final int maxEvents;
     private final long maxProcessTime;
     private final ExecutorService pollExecutor;
@@ -29,13 +29,13 @@ public class QueuePoller {
 
     @Autowired
     public QueuePoller(@Value("${poller.maxThreads:10}") int maxThreads,
-                       @Value("${poller.maxEvents:10}") int maxEvents, // max value for SQS is 10
+                       @Value("${poller.maxEvents:10}") int maxEvents, // max value for SQSQueue is 10
                        @Value("${poller.maxProcessTime:150000}") long maxProcessTime,
                        @Value("${resource.queuename:tmail-resource}") final String queueName,
                        final SQSFactory sqsFactory,
-                       final EventHandlerRegistry eventHandlerRegistry) {
+                       final RequestHandlerRegistry requestHandlerRegistry) {
         if (maxEvents > 10 || maxEvents < 1) {
-            throw new IllegalArgumentException("SQS maxEvents must be a value between 1 and 10, inclusive");
+            throw new IllegalArgumentException("SQSQueue maxEvents must be a value between 1 and 10, inclusive");
         }
         this.maxEvents = maxEvents;
         this.maxProcessTime = maxProcessTime;
@@ -44,7 +44,7 @@ public class QueuePoller {
 
         // fail fast - sqsFactory will throw exception if queue not found, and forceCreate is false
         this.sqs = sqsFactory.of(queueName);
-        this.eventHandlerRegistry = eventHandlerRegistry;
+        this.requestHandlerRegistry = requestHandlerRegistry;
 
         // todo: find queueUrl to verify queue exisists and we have access
     }
@@ -58,7 +58,8 @@ public class QueuePoller {
             try {
                 if (workerManager.tryAcquire(100, TimeUnit.MILLISECONDS)) {
                     pollExecutor.execute(
-                        PollWorker.of(workerManager, sqs, maxEvents, maxProcessTime, eventHandlerRegistry)
+                        PollWorker.of(workerManager, sqs, maxEvents, maxProcessTime,
+                                      requestHandlerRegistry)
                     );
                 }
             } catch (InterruptedException e) {

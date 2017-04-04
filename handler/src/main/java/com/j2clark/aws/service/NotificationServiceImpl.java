@@ -1,6 +1,6 @@
-package com.j2clark.aws.handler;
+package com.j2clark.aws.service;
 
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceAsync;
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.model.Body;
 import com.amazonaws.services.simpleemail.model.Content;
 import com.amazonaws.services.simpleemail.model.Destination;
@@ -19,15 +19,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class NotificationServiceImpl implements NotifyService {
+public class NotificationServiceImpl implements NotificationService {
 
     // http://docs.aws.amazon.com/ses/latest/DeveloperGuide/send-using-sdk-java.html
 
-    private final AmazonSimpleEmailServiceAsync emailService;
+    private final AmazonSimpleEmailService emailService;
     private final AmazonSNS snsService;
 
     @Autowired
-    public NotificationServiceImpl(final AmazonSimpleEmailServiceAsync emailService,
+    public NotificationServiceImpl(final AmazonSimpleEmailService emailService,
                                    final AmazonSNS snsService) {
         this.emailService = emailService;
         this.snsService = snsService;
@@ -36,16 +36,9 @@ public class NotificationServiceImpl implements NotifyService {
     @Override
     public void send(Notification notification) throws NotificationException {
 
-        // todo: catch individual exceptions, combine and throw new
+        sendSMS(notification);
 
-
-        if (notification.isSMS()) {
-            sendSMS(notification);
-        }
-
-        if (notification.isEmail()) {
-            sendEmail(notification);
-        }
+        sendEmail(notification);
     }
 
     /**
@@ -96,8 +89,8 @@ public class NotificationServiceImpl implements NotifyService {
             .withDestination(destination)
             .withMessage(message);
 
-        /*try
-        {*/
+        try
+        {
             System.out.println("Attempting to send an email through Amazon SES by using the AWS SDK for Java...");
 
             // Instantiate an Amazon SES client, which will make the service call. The service call requires your AWS credentials.
@@ -118,12 +111,15 @@ public class NotificationServiceImpl implements NotifyService {
             // Send the email.
             SendEmailResult result = emailService.sendEmail(request);
             return result.getMessageId();
-        /*}
+
+        }
         catch (Exception ex)
         {
 
             System.out.println("The email was not sent.");
             System.out.println("Error message: " + ex.getMessage());
-        }*/
+        }
+
+        return null;
     }
 }

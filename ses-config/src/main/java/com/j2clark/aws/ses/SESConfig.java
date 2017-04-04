@@ -1,6 +1,5 @@
 package com.j2clark.aws.ses;
 
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceAsyncClientBuilder;
 
@@ -25,17 +24,17 @@ public class SESConfig {
     private Environment environment;
 
     @Bean
-    public AmazonSimpleEmailService amazonSQSClient(@Value("${aws.sqs.region:us-west-1}") String awsRegion) {
+    public AmazonSimpleEmailService amazonSimpleEmailService(@Value("${aws.ses.region:us-west-1}") String awsRegion) {
 
         AmazonSimpleEmailService amazonSES;
-        Regions region;
         if(isDev()) {
             logger.warn("Dev Environment!!! Using MockAmazonSQS implementation!");
             amazonSES = new MockAmazonSimpleEmailService();
         } else {
-            // aothough Regions is an enum, Regions.valueOf() throws IllegalArgumentException. Use fromName() instead
-            region = Regions.fromName(awsRegion);
-            amazonSES = AmazonSimpleEmailServiceAsyncClientBuilder.standard().withRegion(region).build();
+            // although Regions is an enum, Regions.valueOf() throws IllegalArgumentException. Use fromName() instead
+            amazonSES = AmazonSimpleEmailServiceAsyncClientBuilder.standard()
+                .withRegion(awsRegion)
+                .build();
         }
 
         return amazonSES;

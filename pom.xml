@@ -27,6 +27,8 @@
         <module>sqs-config</module>
         <module>sns-config</module>
         <module>ses-config</module>
+
+        <module>dev</module>
     </modules>
 
     <dependencyManagement>

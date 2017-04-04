@@ -1,5 +1,6 @@
 package com.j2clark.aws.controllers;
 
+import com.j2clark.aws.domain.RequestChannel;
 import com.j2clark.aws.domain.WelcomeRequestBuilder;
 
 import org.joda.time.DateTime;
@@ -31,7 +32,9 @@ public class WelcomeRequestAdapter extends WelcomeRequestBuilder {
         withUid(model.getUid());
         withFirstName(model.getFirstName());
         withLastName(model.getLastName());
-        withEmail(model.getEmail());
+        if(!StringUtils.isEmpty(model.getEmail())) {
+            withChannel(new RequestChannel.EmailChannel(model.getEmail()));
+        }
 
         return this;
     }

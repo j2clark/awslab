@@ -1,7 +1,7 @@
 package com.j2clark.aws.controllers;
 
-import com.j2clark.aws.domain.WelcomeRequest;
-import com.j2clark.aws.service.EventRequestService;
+import com.j2clark.aws.domain.Request;
+import com.j2clark.aws.service.RequestService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,14 +20,14 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = "/event")
-public class EventController {
+public class RequestController {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final EventRequestService someService;
+    private final RequestService someService;
 
     @Autowired
-    public EventController(final EventRequestService someService) {
+    public RequestController(final RequestService someService) {
         this.someService = someService;
     }
 
@@ -43,7 +43,7 @@ public class EventController {
         }
 
         // exception if required data missing or malformed
-        WelcomeRequest welcomeRequest = WelcomeRequestAdapter.of(transactionId)
+        Request.Welcome welcomeRequest = WelcomeRequestAdapter.of(transactionId)
             .with(model)
             .build();
 

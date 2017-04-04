@@ -1,10 +1,8 @@
 package com.j2clark.aws.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.j2clark.aws.sqs.SQS;
+import com.j2clark.aws.sqs.SQSQueue;
 import com.j2clark.aws.sqs.SQSFactory;
-import com.j2clark.aws.domain.EventMessage;
-import com.j2clark.aws.domain.EventMessageBuilder;
 import com.j2clark.aws.domain.Request;
 
 import org.slf4j.Logger;
@@ -16,15 +14,15 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 
 @Service
-public class EventRequestServiceImpl implements EventRequestService {
+public class RequestServiceImpl implements RequestService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final SQS sqs;
+    private final SQSQueue sqs;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
-    public EventRequestServiceImpl(
+    public RequestServiceImpl(
         @Value("${resource.queuename:tmail-resource}") final String queueName,
         final SQSFactory sqsFactory) {
 
@@ -40,11 +38,12 @@ public class EventRequestServiceImpl implements EventRequestService {
         logger.info("Request["+request.getTransactionId()+"] onRequest");
 
         try {
-            EventMessage message = EventMessageBuilder.of(request).build();
-            String json = objectMapper.writeValueAsString(message);
-            String messageId = sqs.send(json);
+            //EventMessage message = EventMessageBuilder.of(request).build();
+            //String json = objectMapper.writeValueAsString(message);
+            //String messageId = sqs.send(json);
+            String messageId = sqs.send(objectMapper.writeValueAsString(request));
 
-            logger.info("Request["+request.getTransactionId()+"] SQS["+sqs.name()+"] pushed. MessageId[" + messageId + "]");
+            logger.info("Request["+request.getTransactionId()+"] SQSQueue["+sqs.name()+"] pushed. MessageId[" + messageId + "]");
         } catch (IOException e) {
             // fatal exception - this request is dead
             // todo: create a nicr exception which we can handle more gracefully
