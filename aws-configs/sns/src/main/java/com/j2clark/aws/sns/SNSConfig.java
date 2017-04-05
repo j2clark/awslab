@@ -15,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -24,6 +25,9 @@ import java.util.concurrent.Executors;
  *
  *  Developer Guide
  *  http://docs.aws.amazon.com/sns/latest/dg/welcome.html
+ *
+ * Sending SMS Message
+ * http://docs.aws.amazon.com/sns/latest/dg/sms_publish-to-phone.html
  *
  *  SNS seems like a traditional PubSub model
  */

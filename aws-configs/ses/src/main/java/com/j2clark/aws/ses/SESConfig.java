@@ -15,6 +15,17 @@ import org.springframework.util.CollectionUtils;
 import java.util.Arrays;
 import java.util.Collection;
 
+/**
+ * http://docs.aws.amazon.com/sns/latest/dg/welcome.html
+ *
+ *
+ * http://docs.aws.amazon.com/ses/latest/DeveloperGuide/send-using-sdk-java.html
+ *
+ * http://docs.aws.amazon.com/ses/latest/DeveloperGuide/send-using-sdk-java.html
+ *
+ * Test
+ * http://docs.aws.amazon.com/ses/latest/DeveloperGuide/mailbox-simulator.html
+ */
 @Configuration
 public class SESConfig {
 

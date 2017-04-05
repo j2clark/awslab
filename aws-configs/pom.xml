@@ -19,6 +19,7 @@
         <module>ses</module>
         <module>sns</module>
         <module>sqs</module>
+        <module>s3</module>
     </modules>
 
 

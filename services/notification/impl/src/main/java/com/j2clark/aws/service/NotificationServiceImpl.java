@@ -1,43 +1,35 @@
 package com.j2clark.aws.service;
 
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
-import com.amazonaws.services.simpleemail.model.Body;
-import com.amazonaws.services.simpleemail.model.Content;
-import com.amazonaws.services.simpleemail.model.Destination;
-import com.amazonaws.services.simpleemail.model.Message;
-import com.amazonaws.services.simpleemail.model.SendEmailRequest;
-import com.amazonaws.services.simpleemail.model.SendEmailResult;
-import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.model.MessageAttributeValue;
-import com.amazonaws.services.sns.model.PublishRequest;
-import com.amazonaws.services.sns.model.PublishResult;
 import com.j2clark.aws.domain.Notification;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class NotificationServiceImpl implements NotificationService {
 
+    private final Logger logger  = LoggerFactory.getLogger(getClass());
+
+    // This is effectively are callout to Pinpoint server, which may or may not be an AWS Service
+
+
     // http://docs.aws.amazon.com/ses/latest/DeveloperGuide/send-using-sdk-java.html
 
-    private final AmazonSimpleEmailService emailService;
-    private final AmazonSNS snsService;
+    /*private final AmazonSimpleEmailService emailService;
+    private final AmazonSNS snsService;*/
 
-    @Autowired
+    /*@Autowired
     public NotificationServiceImpl(final AmazonSimpleEmailService emailService,
                                    final AmazonSNS snsService) {
         this.emailService = emailService;
         this.snsService = snsService;
-    }
+    }*/
 
     @Override
     public void send(Notification notification) throws NotificationException {
 
-        throw new UnsupportedOperationException("TO BE IMPLEMENTED");
+        logger.info ("Got notification["+notification.getTransactionId()+"], ingesting and ignoring");
 
         /*sendSMS(notification);
 
@@ -47,7 +39,7 @@ public class NotificationServiceImpl implements NotificationService {
     /**
      * @return the message id
      */
-    protected String sendSMS(Notification notification) /*throws SMSException*/ {
+    /*protected String sendSMS(Notification notification) *//*throws SMSException*//* {
 
         String message = "My SMS message";
         String phoneNumber = "+1XXX5550100";
@@ -62,7 +54,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
 
-    protected String sendEmail(Notification notification) /*throws EMailException*/ {
+    protected String sendEmail(Notification notification) *//*throws EMailException*//* {
 
         String TO = "";
         String SUBJECT = "";
@@ -122,5 +114,5 @@ public class NotificationServiceImpl implements NotificationService {
         }
 
         return null;
-    }
+    }*/
 }

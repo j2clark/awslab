@@ -26,6 +26,9 @@ import java.util.Collection;
  * http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/index.html?com/amazonaws/services/sqs/AmazonSQS.html
  *
  * http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-attributes.html
+ *
+ * General: creating service clients
+ * http://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/creating-clients.html
  */
 @Configuration
 public class SQSConfig {

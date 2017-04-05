@@ -9,7 +9,6 @@ AWS Java API http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/index.html
 ### Features
 * enable Email messages
 * enable SMS notifications
-* break out email/sns to separate application (aka pinpoint)
 * enable application callback using SNS
 
 ### Metrics
@@ -39,7 +38,8 @@ AWS Java API http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/index.html
 
 ### AutoScale Group 
 * Implement AutoScale using custom AMI (above)
-
+* Autoscale handler based on number of messages pending (Cloudwatch Alarm)
+* Disable endpoint if pending messages > X (Cloudwatch Alarm)
 
 
 
