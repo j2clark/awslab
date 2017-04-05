@@ -1,0 +1,30 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>notification.impl</artifactId>
+    <name>notification.impl</name>
+    <version>1.0-SNAPSHOT</version>
+    <parent>
+        <groupId>com.j2clark.aws-lab.services</groupId>
+        <artifactId>notification</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.j2clark.aws-lab.services</groupId>
+            <artifactId>notification.api</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.j2clark.aws-lab.aws-configs</groupId>
+            <artifactId>sns</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.j2clark.aws-lab.aws-configs</groupId>
+            <artifactId>ses</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+</project>

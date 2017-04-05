@@ -21,14 +21,19 @@
     </properties>
 
     <modules>
-        <module>tmail</module>
-        <module>handler</module>
-        <module>domain</module>
-        <module>sqs-config</module>
-        <module>sns-config</module>
-        <module>ses-config</module>
+        <module>services</module>
+        <module>aws-configs</module>
+        <module>applications</module>
 
-        <module>dev</module>
+
+        <!--<module>tmail</module>
+        <module>handler</module>-->
+        <!--<module>domain</module>-->
+        <!--<module>sqs-config</module>
+        <module>sns-config</module>
+        <module>ses-config</module>-->
+
+        <!--<module>dev</module>-->
     </modules>
 
     <dependencyManagement>
