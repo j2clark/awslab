@@ -37,7 +37,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void send(Notification notification) throws NotificationException {
 
-        throw new UnsupportedOperationException("TO BE IMPOLEMENTED");
+        throw new UnsupportedOperationException("TO BE IMPLEMENTED");
 
         /*sendSMS(notification);
 
@@ -45,8 +45,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     /**
-     *
-     * @param notification
      * @return the message id
      */
     protected String sendSMS(Notification notification) /*throws SMSException*/ {

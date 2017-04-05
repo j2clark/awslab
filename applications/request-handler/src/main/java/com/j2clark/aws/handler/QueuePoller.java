@@ -46,7 +46,7 @@ public class QueuePoller {
         this.sqs = sqsFactory.of(queueName);
         this.requestHandlerRegistry = requestHandlerRegistry;
 
-        // todo: find queueUrl to verify queue exisists and we have access
+        // todo: find queueUrl to verify queue exists and we have access
     }
 
     @Scheduled(

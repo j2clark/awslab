@@ -26,12 +26,12 @@ public class RequestServiceImpl implements RequestService {
         @Value("${resource.queuename:tmail-resource}") final String queueName,
         final SQSFactory sqsFactory) {
 
-        // fail fast - sqsFactgory will throw an exception if queue is not found, and force create not enabled
+        // fail fast - sqsFactory will throw an exception if queue is not found, and force create not enabled
         this.sqs = sqsFactory.of(queueName);
     }
 
     /**
-     * publish request to queue for asynch processing
+     * publish request to queue for async processing
      */
     public void onRequest(Request request) {
 
@@ -46,7 +46,7 @@ public class RequestServiceImpl implements RequestService {
             logger.info("Request["+request.getTransactionId()+"] SQSQueue["+sqs.name()+"] pushed. MessageId[" + messageId + "]");
         } catch (IOException e) {
             // fatal exception - this request is dead
-            // todo: create a nicr exception which we can handle more gracefully
+            // todo: create a nicer exception which we can handle more gracefully
             throw new RuntimeException(e);
         }
     }

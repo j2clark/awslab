@@ -1,17 +1,13 @@
 package com.j2clark.aws.sqs;
 
-import com.amazonaws.services.sqs.model.DeleteMessageResult;
 import com.amazonaws.services.sqs.model.Message;
-import com.amazonaws.services.sqs.model.ReceiveMessageResult;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -71,18 +67,11 @@ public class MockSQSFactory extends SQSFactory {
         @Override
         public Collection<Message> retrieveMessages(int maxCount) {
             Set<String> keys = queue.keySet().stream().limit(maxCount).collect(Collectors.toSet());
-            List<Message> results = new ArrayList<>();
-            for (String key : keys) {
-                if (queue.containsKey(key)) {
-                    results.add(new Message()
-                                    .withMessageId(key)
-                                    .withReceiptHandle(
-                                        key) // NOTE: in AWS, these keys are never the same, and a new requestHandle is generated each request
-                                    .withBody(queue.get(key)));
-                }
-            }
-
-            return results;
+            return
+                keys.stream().filter(queue::containsKey).map(key -> new Message()
+                    .withMessageId(key)
+                    .withReceiptHandle(key) // NOTE: in AWS, these keys are never the same, and a new requestHandle is generated each request
+                    .withBody(queue.get(key))).collect(Collectors.toList());
         }
 
         @Override

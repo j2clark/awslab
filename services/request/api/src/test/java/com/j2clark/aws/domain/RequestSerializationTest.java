@@ -2,12 +2,10 @@ package com.j2clark.aws.domain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.joda.time.DateTime;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.UUID;
 
 @Ignore
 public class RequestSerializationTest {

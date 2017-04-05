@@ -15,7 +15,7 @@ public class Application {
     // working with AWS IAM roles on EC2 instance
     //see http://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/java-dg-roles.html
 
-    // example of overriding sqs endpoint/regio
+    // example of overriding sqs endpoint/region
     //see https://www.javacodegeeks.com/2013/06/working-with-amazon-simple-queue-service-using-java.html
 
     public static void main(String[] args) {

@@ -89,7 +89,7 @@ public class PollWorker implements Runnable {
                 try {
                     long processEventStart = System.currentTimeMillis();
 
-                    // we are commited to this message - delete from queue
+                    // we are committed to this message - delete from queue
                     sqs.deleteMessage(message);
                     logger.info("PollID[" + pollId + "] SQSQueue[" + sqs.name() + "] MessageId["+messageId+"] deleted from queue");
 

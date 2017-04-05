@@ -20,7 +20,7 @@ public class NotificationAdapter extends NotificationBuilder {
     public static NotificationAdapter of(Request request) {
         return (NotificationAdapter) new NotificationAdapter()
                 .withTransactionId(request.getTransactionId())
-                .withReqeustTimestamp(request.getRequestTimestamp())
+                .withRequestTimestamp(request.getRequestTimestamp())
                 .withClientId(request.getClientId())
                 .withChannels(adapt(request.getChannels()));
     }

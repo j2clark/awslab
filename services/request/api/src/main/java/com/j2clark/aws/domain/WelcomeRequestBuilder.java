@@ -124,7 +124,7 @@ public class WelcomeRequestBuilder {
             @JsonProperty("transactionId") UUID transactionId,
             @JsonProperty("clientId") String clientId,
             @JsonProperty("uid") String uid,
-            @JsonProperty("requestTimestanmp") long requestTimestamp,
+            @JsonProperty("requestTimestamp") long requestTimestamp,
             @JsonProperty("firstName") String firstName,
             @JsonProperty("lastName") String lastName,
             @JsonProperty("channels") Set<RequestChannel> channels) {

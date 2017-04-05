@@ -31,7 +31,7 @@ public class NotificationBuilder {
         return this;
     }
 
-    public NotificationBuilder withReqeustTimestamp(Long timestamp) {
+    public NotificationBuilder withRequestTimestamp(Long timestamp) {
         this.timestamp = timestamp;
         return this;
     }
