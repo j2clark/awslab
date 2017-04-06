@@ -42,7 +42,17 @@ AWS Java API http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/index.html
 * Disable endpoint if pending messages > X (Cloudwatch Alarm)
 
 
+## Logging
 
+https://logmatic.io/blog/everything-you-need-to-know-about-aws-logging/
+linux: rsyslog
+
+http://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html
+
+Detailed 
+http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/quickref-cloudwatchlogs.html
+
+https://aws.amazon.com/blogs/devops/getting-started-with-cloudwatch-logs/
 
 ## Remote debugging into EC2 using intellij
 
@@ -66,3 +76,5 @@ Meanwhile, back in IntelliJ...
     e.g. java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 app.jar
     
 5. Now run IntelliJ remote debug config - you should be connected!!!
+
+If using bastion, this may be of interest: http://arjon.es/2014/03/27/remote-debug-java-app-using-ssh-tunneling-without-opening-server-ports/
