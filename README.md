@@ -10,6 +10,7 @@ AWS Java API http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/index.html
 * enable Email messages
 * enable SMS notifications
 * enable application callback using SNS
+* disable endpoint from alarm, using SNS 
 
 ### Metrics
 * Send metrics to CloudWatch, 
@@ -28,10 +29,9 @@ AWS Java API http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/index.html
 
     repo/
     |-- appName/
-           |-app-1.0.jar
-           |-app-2.0.jar
-           |-- latest/
-                  |-app.jar (->app-2.0.jar)
+    |       |-app-1.0.jar
+    |       |-app-2.0.jar
+    |       |-app-latest.jar (->app-2.0.jar)
 
 ### AMI 
 * create custom java 8 AMI
@@ -40,26 +40,24 @@ AWS Java API http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/index.html
 * Implement AutoScale using custom AMI (above)
 * Autoscale handler based on number of messages pending (Cloudwatch Alarm)
 * Disable endpoint if pending messages > X (Cloudwatch Alarm)
-
+todo: detailed setup of autoscale, including creating an alarm
 
 ## Logging
 
-https://logmatic.io/blog/everything-you-need-to-know-about-aws-logging/
-linux: rsyslog
-
+### Using CloudWatch Logs
 http://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html
-
-Detailed 
 http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/quickref-cloudwatchlogs.html
-
 https://aws.amazon.com/blogs/devops/getting-started-with-cloudwatch-logs/
+todo: detail how awslogs used to centralize logs in CloudWatch
+todo: investigate streaming logs to Elasticpath
+
 
 ## Remote debugging into EC2 using intellij
 
 Under EC2 - Security Groups
 1. Create Security Group:
-    Create obvious name, e.g. Java Debug 5005 
-    Type            | Protocol  | Port  | Source 
+    Create obvious name, e.g. Java Debug 5005
+    Type            | Protocol  | Port  | Source
     Custom TPC Rule | TCP       | 5005  | 0.0.0.0/0
     
 2. Under EC2 -> Instances
@@ -77,4 +75,4 @@ Meanwhile, back in IntelliJ...
     
 5. Now run IntelliJ remote debug config - you should be connected!!!
 
-If using bastion, this may be of interest: http://arjon.es/2014/03/27/remote-debug-java-app-using-ssh-tunneling-without-opening-server-ports/
+6. I haven't done this yet, but if using an ssh bastion this may be of interest: http://arjon.es/2014/03/27/remote-debug-java-app-using-ssh-tunneling-without-opening-server-ports/

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-s3_base=j2clark/repo
-application=request-endpoint
-bucket=${s3_base}/${application}
+export s3_base=j2clark/repo
+export application=request-handler
+export bucket=${s3_base}/${application}
 
 # ec2 bash script executed by root on ec2 instance initialization
 
@@ -22,14 +22,11 @@ aws s3 cp s3://${bucket}/conf/awslogs.conf /etc/awslogs/awslogs.conf
 service awslogs start
 chkconfig awslogs on
 
-# create directory for application and log files
-mkdir /app
-
 # copy latest jar from s3
 aws s3 cp s3://${bucket}/jar/${application}-latest.jar /app/${application}.jar
 
 # run application - we should still be /app
+cd /app
 # debug mode
-#java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 /app/${application}.jar &
-java -jar /app/${application}.jar &
-
+#java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 ${application}.jar &
+java -jar ${application}.jar &
